@@ -1558,6 +1558,10 @@ This will be called once for each client frame, which will
 usually be a couple times for each server frame.
 ==============
 */
+void poison(edict_t *ent)
+{
+	ent->health = ent->health - 10;
+}
 void ClientThink (edict_t *ent, usercmd_t *ucmd)
 {
 	gclient_t	*client;
@@ -1565,9 +1569,16 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	int		i, j;
 	pmove_t	pm;
 
+	if(floor(level.time) == level.time){
+		if(ent->poison){
+			gi.dprintf("Client is Thinking: %.6f\n", level.time);
+			poison(ent);
+		}
+		
+	}
 	level.current_entity = ent;
 	client = ent->client;
-
+	
 	if (level.intermissiontime)
 	{
 		client->ps.pmove.pm_type = PM_FREEZE;

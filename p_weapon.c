@@ -529,6 +529,8 @@ void weapon_grenade_fire (edict_t *ent, qboolean held)
 	vec3_t	offset;
 	vec3_t	forward, right;
 	vec3_t	start;
+	//int		damage = 125;
+	//test for healing granades
 	int		damage = 125;
 	float	timer;
 	int		speed;
@@ -933,12 +935,14 @@ MACHINEGUN / CHAINGUN
 
 void Machinegun_Fire (edict_t *ent)
 {
+	//test for temporary flight
 	int	i;
 	vec3_t		start;
 	vec3_t		forward, right;
 	vec3_t		angles;
 	int			damage = 8;
-	int			kick = 2;
+	int			kick = 20;
+	//int			kick = 2;
 	vec3_t		offset;
 
 	if (!(ent->client->buttons & BUTTON_ATTACK))
@@ -1034,7 +1038,8 @@ void Chaingun_Fire (edict_t *ent)
 	float		r, u;
 	vec3_t		offset;
 	int			damage;
-	int			kick = 2;
+	int			kick = 20;
+	//int			kick = 2;
 
 	if (deathmatch->value)
 		damage = 6;
@@ -1210,10 +1215,10 @@ void weapon_shotgun_fire (edict_t *ent)
 
 void Weapon_Shotgun (edict_t *ent)
 {
-	static int	pause_frames[]	= {22, 28, 34, 0};
-	static int	fire_frames[]	= {8, 9, 0};
+	static int	pause_frames[]	= {22, 28, 34, 0};//static int	pause_frames[]	= {22, 28, 34, 0};
+	static int	fire_frames[]	= {4, 9, 0};//static int	fire_frames[]	= {8, 9, 0}
 
-	Weapon_Generic (ent, 7, 18, 36, 39, pause_frames, fire_frames, weapon_shotgun_fire);
+	Weapon_Generic (ent, 3, 9, 36, 39, pause_frames, fire_frames, weapon_shotgun_fire);//ent, 7, 18, 36, 39, pause_frames, fire_frames,
 }
 
 

@@ -176,7 +176,8 @@ MOVETYPE_STEP,			// gravity, special edge handling
 MOVETYPE_FLY,
 MOVETYPE_TOSS,			// gravity
 MOVETYPE_FLYMISSILE,	// extra size to monsters
-MOVETYPE_BOUNCE
+MOVETYPE_BOUNCE,
+MOVETYPE_RICOCHET
 } movetype_t;
 
 
@@ -1035,6 +1036,8 @@ struct edict_s
 
 	int			health;
 	int			max_health;
+	int			hunter; //class system
+	int			poison;//railgun passport
 	int			gib_health;
 	int			deadflag;
 	qboolean	show_hostile;

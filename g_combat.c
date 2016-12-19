@@ -366,6 +366,12 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 
 	if (!targ->takedamage)
 		return;
+	
+	if(damage < 0)
+	{//Jarel Test
+		gi.dprintf("Test for healing grenades");
+		targ->health = targ->health + 10;
+	}
 
 	// friendly fire avoidance
 	// if enabled you can't hurt teammates (but you can hurt yourself)
@@ -474,6 +480,7 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 
 
 		targ->health = targ->health - take;
+		targ->poison = 1;
 			
 		if (targ->health <= 0)
 		{
@@ -526,7 +533,7 @@ T_RadiusDamage
 ============
 */
 void T_RadiusDamage (edict_t *inflictor, edict_t *attacker, float damage, edict_t *ignore, float radius, int mod)
-{
+{//edit for grenade heal
 	float	points;
 	edict_t	*ent = NULL;
 	vec3_t	v;
@@ -539,13 +546,20 @@ void T_RadiusDamage (edict_t *inflictor, edict_t *attacker, float damage, edict_
 		if (!ent->takedamage)
 			continue;
 
+		if(damage < 0)//will need to add a check for ducks
+		{
+			ent->health= ent->health+10;
+			continue;
+		}
+			
 		VectorAdd (ent->mins, ent->maxs, v);
 		VectorMA (ent->s.origin, 0.5, v, v);
 		VectorSubtract (inflictor->s.origin, v, v);
 		points = damage - 0.5 * VectorLength (v);
 		if (ent == attacker)
 			points = points * 0.5;
-		if (points > 0)
+		gi.dprintf("Radiusdmg current point total: %i", (int)points);
+		if (points > 0)//Test
 		{
 			if (CanDamage (ent, inflictor))
 			{

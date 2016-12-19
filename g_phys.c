@@ -683,7 +683,8 @@ void SV_Physics_Toss (edict_t *ent)
 
 // add gravity
 	if (ent->movetype != MOVETYPE_FLY
-	&& ent->movetype != MOVETYPE_FLYMISSILE)
+	&& ent->movetype != MOVETYPE_FLYMISSILE
+	&& ent->movetype != MOVETYPE_RICOCHET)//Jarel Ricochet changes
 		SV_AddGravity (ent);
 
 // move angles
@@ -697,15 +698,22 @@ void SV_Physics_Toss (edict_t *ent)
 
 	if (trace.fraction < 1)
 	{
-		if (ent->movetype == MOVETYPE_BOUNCE)
-			backoff = 1.5;
+		if(ent->movetype == MOVETYPE_RICOCHET)
+			backoff = 2;
+		else if (ent->movetype == MOVETYPE_BOUNCE)
+			backoff = 0;//1.5
 		else
 			backoff = 1;
 
 		ClipVelocity (ent->velocity, trace.plane.normal, ent->velocity, backoff);
+		//fix angle for richochet
+		if(ent->movetype == MOVETYPE_RICOCHET)
+		{
+			vectoangles(ent->velocity, ent->s.angles);
+		}
 
 	// stop if on ground
-		if (trace.plane.normal[2] > 0.7)
+		if (trace.plane.normal[2] > 0.7 && ent->movetype != MOVETYPE_RICOCHET)
 		{		
 			if (ent->velocity[2] < 60 || ent->movetype != MOVETYPE_BOUNCE )
 			{
@@ -934,6 +942,7 @@ void G_RunEntity (edict_t *ent)
 	case MOVETYPE_BOUNCE:
 	case MOVETYPE_FLY:
 	case MOVETYPE_FLYMISSILE:
+	case MOVETYPE_RICOCHET:
 		SV_Physics_Toss (ent);
 		break;
 	default:

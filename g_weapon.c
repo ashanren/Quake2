@@ -310,6 +310,7 @@ void blaster_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *
 	}
 	else
 	{
+		return;//Jarel changes for ricochet
 		gi.WriteByte (svc_temp_entity);
 		gi.WriteByte (TE_BLASTER);
 		gi.WritePosition (self->s.origin);
@@ -341,7 +342,7 @@ void fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int spee
 	VectorCopy (start, bolt->s.old_origin);
 	vectoangles (dir, bolt->s.angles);
 	VectorScale (dir, speed, bolt->velocity);
-	bolt->movetype = MOVETYPE_FLYMISSILE;
+	bolt->movetype = MOVETYPE_RICOCHET;
 	bolt->clipmask = MASK_SHOT;
 	bolt->solid = SOLID_BBOX;
 	bolt->s.effects |= effect;
@@ -376,6 +377,7 @@ void fire_blaster (edict_t *self, vec3_t start, vec3_t dir, int damage, int spee
 fire_grenade
 =================
 */
+
 static void Grenade_Explode (edict_t *ent)
 {
 	vec3_t		origin;
@@ -464,6 +466,34 @@ static void Grenade_Touch (edict_t *ent, edict_t *other, cplane_t *plane, csurfa
 	Grenade_Explode (ent);
 }
 
+//mine thinker
+static void proxim_think(edict_t *ent)
+{
+	edict_t *blip = NULL;
+	if(level.time > ent->delay)
+	{
+		Grenade_Explode(ent);
+		return;
+	}
+	ent->think = proxim_think;
+
+	while((blip = findradius(blip, ent->s.origin, 100)) != NULL)
+	{
+		if(!(blip->svflags & SVF_MONSTER) && !blip->client)
+			continue;
+		if(blip == ent->owner)
+			continue;
+		if(!blip->takedamage)
+			continue;
+		if(blip->health <= 0)
+			continue;
+		if(!visible(ent,blip))
+			continue;
+		ent->think = Grenade_Explode;
+		break;
+	}
+	ent->nextthink = level.time+.1;
+}
 void fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float timer, float damage_radius)
 {
 	edict_t	*grenade;
@@ -488,13 +518,19 @@ void fire_grenade (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int s
 	grenade->s.modelindex = gi.modelindex ("models/objects/grenade/tris.md2");
 	grenade->owner = self;
 	grenade->touch = Grenade_Touch;
-	grenade->nextthink = level.time + timer;
-	grenade->think = Grenade_Explode;
+	//Jarel Miner
+	//grenade->nextthink = level.time + timer;
+	//grenade->think = Grenade_Explode;
+	grenade->nextthink = level.time + .1;
+	grenade->think = proxim_think;
+	grenade->delay = level.time + 120;
+
 	grenade->dmg = damage;
 	grenade->dmg_radius = damage_radius;
 	grenade->classname = "grenade";
 
 	gi.linkentity (grenade);
+	gi.dprintf("Gets Here: %i",damage);
 }
 
 void fire_grenade2 (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int speed, float timer, float damage_radius, qboolean held)
@@ -538,6 +574,7 @@ void fire_grenade2 (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int 
 	{
 		gi.sound (self, CHAN_WEAPON, gi.soundindex ("weapons/hgrent1a.wav"), 1, ATTN_NORM, 0);
 		gi.linkentity (grenade);
+		gi.dprintf("Grenade 2 dmg: %i\n",damage);
 	}
 }
 
@@ -553,7 +590,13 @@ void rocket_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *su
 	int			n;
 
 	if (other == ent->owner)
+	{
+		gi.dprintf("Gets Here");
+		//Jarel test
+		other->speed = 0;
+		G_FreeEdict (ent);
 		return;
+	}
 
 	if (surf && (surf->flags & SURF_SKY))
 	{
@@ -570,6 +613,14 @@ void rocket_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *su
 	if (other->takedamage)
 	{
 		T_Damage (other, ent, ent->owner, ent->velocity, ent->s.origin, plane->normal, ent->dmg, 0, 0, MOD_ROCKET);
+		//jarel
+		//ent->speed = 0;
+		T_RadiusDamage(ent, ent->owner, ent->radius_dmg, other, ent->dmg_radius, MOD_R_SPLASH);
+		gi.WriteByte (TE_ROCKET_EXPLOSION);
+		gi.WritePosition (origin);
+		gi.multicast (ent->s.origin, MULTICAST_PHS);
+
+		G_FreeEdict (ent);
 	}
 	else
 	{
@@ -586,7 +637,7 @@ void rocket_touch (edict_t *ent, edict_t *other, cplane_t *plane, csurface_t *su
 	}
 
 	T_RadiusDamage(ent, ent->owner, ent->radius_dmg, other, ent->dmg_radius, MOD_R_SPLASH);
-
+	return;//test
 	gi.WriteByte (svc_temp_entity);
 	if (ent->waterlevel)
 		gi.WriteByte (TE_ROCKET_EXPLOSION_WATER);
@@ -607,7 +658,7 @@ void fire_rocket (edict_t *self, vec3_t start, vec3_t dir, int damage, int speed
 	VectorCopy (dir, rocket->movedir);
 	vectoangles (dir, rocket->s.angles);
 	VectorScale (dir, speed, rocket->velocity);
-	rocket->movetype = MOVETYPE_FLYMISSILE;
+	rocket->movetype = MOVETYPE_RICOCHET;
 	rocket->clipmask = MASK_SHOT;
 	rocket->solid = SOLID_BBOX;
 	rocket->s.effects |= EF_ROCKET;
@@ -669,7 +720,10 @@ void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick
 				ignore = NULL;
 
 			if ((tr.ent != self) && (tr.ent->takedamage))
+			{
 				T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_RAILGUN);
+				tr.ent->poison = 1;//poison bow
+			}
 		}
 
 		VectorCopy (tr.endpos, from);
