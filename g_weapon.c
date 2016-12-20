@@ -723,6 +723,7 @@ void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick
 			if ((tr.ent != self) && (tr.ent->takedamage))
 			{
 				T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_RAILGUN);
+				tr.ent->poisoner = self;
 				tr.ent->poison = 1;//poison bow
 					// (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir, vec3_t point, vec3_t normal, int damage, int knockback, int dflags, int mod)
 					//(edict_t *targ, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)

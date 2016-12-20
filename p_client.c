@@ -1286,15 +1286,17 @@ to be placed into the game.  This will happen every level load.
 void ClientBegin (edict_t *ent)
 {
 	int		i;
-
+	
 	ent->client = game.clients + (ent - g_edicts - 1);
 
 	if (deathmatch->value)
 	{
 		ClientBeginDeathmatch (ent);
 		gi.dprintf("Number of clients: %i", (ent - g_edicts - 1));
-		if( (ent - g_edicts - 1) == 0)
+		if( (ent - g_edicts - 1) == 0){
 			ent->hunter = 1;
+			ent->timer = level.time+20;
+		}
 		else
 			ent->hunter = 0;
 		return;
@@ -1568,8 +1570,9 @@ void poison(edict_t *ent)
 	ent->health = ent->health -1;
 	
 	if(ent->health <= 0){
-		ent->die(ent,ent,ent,2,ent->s.origin);
+		ent->die(ent,ent->poisoner,ent->poisoner,2,ent->s.origin);
 		ent->poison = 0;
+		ent->poisoner->replacement = ent;
 		//ent->deadflag = DEAD_DEAD;
 	}
 }
@@ -1584,8 +1587,28 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	client = ent->client;
 	
 
+	if(ent->hunter){
+		if(ent->timer == level.time)
+		{
+			ent->die(ent,ent,ent,2,ent->s.origin);
+			ent->hunter = 0;
+			//need to choose next hunter
+			gi.dprintf("Ran out of time");
+
+		}
+		else if(ent->client->resp.score == 3)//change to 5
+		{
+			ent->hunter = 0;
+			ent->replacement->hunter = 1;
+			//ent->replacement->die
+			gi.dprintf("Hunter gained required points");
+		}
+	}
 	if(floor(level.time) == level.time){
 		//gi.dprintf("Hunter: %i", ent->hunter);
+		if(ent->hunter){
+			gi.dprintf("%i",ent->client->resp.score);
+		}
 		if(ent->poison){
 			//gi.dprintf("Client is Thinking: %c\n", ent->classname);
 			poison(ent);

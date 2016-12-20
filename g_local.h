@@ -1038,6 +1038,9 @@ struct edict_s
 	int			max_health;
 	int			hunter; //class system
 	int			poison;//railgun passport
+	int			timer; //hunter class timeout
+	edict_t		*poisoner;
+	edict_t		*replacement;
 	int			gib_health;
 	int			deadflag;
 	qboolean	show_hostile;
