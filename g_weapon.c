@@ -300,13 +300,14 @@ void blaster_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *
 	if (self->owner->client)
 		PlayerNoise(self->owner, self->s.origin, PNOISE_IMPACT);
 
-	if (other->takedamage)
+	if (other->takedamage && !other->hunter)
 	{
 		if (self->spawnflags & 1)
 			mod = MOD_HYPERBLASTER;
 		else
 			mod = MOD_BLASTER;
 		T_Damage (other, self, self->owner, self->velocity, self->s.origin, plane->normal, self->dmg, 1, DAMAGE_ENERGY, mod);
+		other->poison = 0;
 	}
 	else
 	{
@@ -723,6 +724,8 @@ void fire_rail (edict_t *self, vec3_t start, vec3_t aimdir, int damage, int kick
 			{
 				T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, 0, MOD_RAILGUN);
 				tr.ent->poison = 1;//poison bow
+					// (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir, vec3_t point, vec3_t normal, int damage, int knockback, int dflags, int mod)
+					//(edict_t *targ, edict_t *inflictor, edict_t *attacker, int damage, vec3_t point)
 			}
 		}
 

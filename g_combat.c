@@ -367,6 +367,16 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 	if (!targ->takedamage)
 		return;
 	
+	if(!inflictor->hunter){
+		gi.dprintf("hunter not hit\n HUNTER NOT HIT");
+		if(!targ->hunter){
+			targ->health += 10;
+			return;
+		}
+	}
+	else{
+		gi.dprintf("hunter hit");
+	}
 	if(damage < 0)
 	{//Jarel Test
 		gi.dprintf("Test for healing grenades");

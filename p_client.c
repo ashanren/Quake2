@@ -1292,6 +1292,11 @@ void ClientBegin (edict_t *ent)
 	if (deathmatch->value)
 	{
 		ClientBeginDeathmatch (ent);
+		gi.dprintf("Number of clients: %i", (ent - g_edicts - 1));
+		if( (ent - g_edicts - 1) == 0)
+			ent->hunter = 1;
+		else
+			ent->hunter = 0;
 		return;
 	}
 
@@ -1560,7 +1565,13 @@ usually be a couple times for each server frame.
 */
 void poison(edict_t *ent)
 {
-	ent->health = ent->health - 10;
+	ent->health = ent->health -1;
+	
+	if(ent->health <= 0){
+		ent->die(ent,ent,ent,2,ent->s.origin);
+		ent->poison = 0;
+		//ent->deadflag = DEAD_DEAD;
+	}
 }
 void ClientThink (edict_t *ent, usercmd_t *ucmd)
 {
@@ -1569,15 +1580,19 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	int		i, j;
 	pmove_t	pm;
 
-	if(floor(level.time) == level.time){
-		if(ent->poison){
-			gi.dprintf("Client is Thinking: %.6f\n", level.time);
-			poison(ent);
-		}
-		
-	}
 	level.current_entity = ent;
 	client = ent->client;
+	
+
+	if(floor(level.time) == level.time){
+		//gi.dprintf("Hunter: %i", ent->hunter);
+		if(ent->poison){
+			//gi.dprintf("Client is Thinking: %c\n", ent->classname);
+			poison(ent);
+		}
+	
+		
+	}
 	
 	if (level.intermissiontime)
 	{
