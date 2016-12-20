@@ -201,9 +201,11 @@ static void fire_lead (edict_t *self, vec3_t start, vec3_t aimdir, int damage, i
 	{
 		if (tr.fraction < 1.0)
 		{
-			if (tr.ent->takedamage)
+			if (tr.ent->takedamage && !tr.ent->hunter)
 			{
+				//stun tests
 				T_Damage (tr.ent, self, self, aimdir, tr.endpos, tr.plane.normal, damage, kick, DAMAGE_BULLET, mod);
+				tr.ent->stun = 1;
 			}
 			else
 			{
@@ -308,6 +310,7 @@ void blaster_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *
 			mod = MOD_BLASTER;
 		T_Damage (other, self, self->owner, self->velocity, self->s.origin, plane->normal, self->dmg, 1, DAMAGE_ENERGY, mod);
 		other->poison = 0;
+		other->stun = 0;
 	}
 	else
 	{

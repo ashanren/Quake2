@@ -1295,7 +1295,7 @@ void ClientBegin (edict_t *ent)
 		gi.dprintf("Number of clients: %i", (ent - g_edicts - 1));
 		if( (ent - g_edicts - 1) == 0){
 			ent->hunter = 1;
-			ent->timer = level.time+20;
+			ent->timer = level.time+300;
 		}
 		else
 			ent->hunter = 0;
@@ -1568,11 +1568,10 @@ usually be a couple times for each server frame.
 void poison(edict_t *ent)
 {
 	ent->health = ent->health -1;
-	
+	ent->poisoner->replacement = ent;
 	if(ent->health <= 0){
 		ent->die(ent,ent->poisoner,ent->poisoner,2,ent->s.origin);
 		ent->poison = 0;
-		ent->poisoner->replacement = ent;
 		//ent->deadflag = DEAD_DEAD;
 	}
 }
@@ -1592,6 +1591,13 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		{
 			ent->die(ent,ent,ent,2,ent->s.origin);
 			ent->hunter = 0;
+			if(ent->replacement)
+			{
+				ent->replacement->hunter = 1;
+				ent->replacement->timer = level.time+300;
+			}
+			else
+				gi.dprintf("Well done you Get nothing ");
 			//need to choose next hunter
 			gi.dprintf("Ran out of time");
 
@@ -1600,6 +1606,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		{
 			ent->hunter = 0;
 			ent->replacement->hunter = 1;
+			ent->replacement->timer = level.time+300;
 			//ent->replacement->die
 			gi.dprintf("Hunter gained required points");
 		}
@@ -1654,8 +1661,18 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 		for (i=0 ; i<3 ; i++)
 		{
-			pm.s.origin[i] = ent->s.origin[i]*8;
-			pm.s.velocity[i] = ent->velocity[i]*8;
+			
+			if(ent->hunter || !ent->stun)
+			{
+				//add something for flight later
+				pm.s.origin[i] = ent->s.origin[i]*8;
+				pm.s.velocity[i] = ent->velocity[i]*8;
+			}
+			else if(ent->stun)
+			{
+				pm.s.origin[i] = 0;
+				pm.s.velocity[i] = 0;
+			}
 		}
 
 		if (memcmp(&client->old_pmove, &pm.s, sizeof(pm.s)))
@@ -1678,6 +1695,8 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 		for (i=0 ; i<3 ; i++)
 		{
+			//ent->s.origin[i] = pm.s.origin[i]*0.125;
+			//ent->velocity[i] = pm.s.velocity[i]*0.125;
 			ent->s.origin[i] = pm.s.origin[i]*0.125;
 			ent->velocity[i] = pm.s.velocity[i]*0.125;
 		}

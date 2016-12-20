@@ -299,7 +299,7 @@ typedef struct cvar_s
 	char		*name;
 	char		*string;
 	char		*latched_string;	// for CVAR_LATCH vars
-	int			flags;
+	int			flags; 
 	qboolean	modified;	// set each time the cvar is changed
 	float		value;
 	struct cvar_s *next;
@@ -989,6 +989,7 @@ typedef enum
 #define	STAT_FLASHES			15		// cleared each frame, 1 = health, 2 = armor
 #define STAT_CHASE				16
 #define STAT_SPECTATOR			17
+#define STAT_HUNTER				18
 
 #define	MAX_STATS				32
 

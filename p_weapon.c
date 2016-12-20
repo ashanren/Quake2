@@ -101,6 +101,8 @@ qboolean Pickup_Weapon (edict_t *ent, edict_t *other)
 	int			index;
 	gitem_t		*ammo;
 
+	if(!other->hunter)
+		return;
 	index = ITEM_INDEX(ent->item);
 
 	if ( ( ((int)(dmflags->value) & DF_WEAPONS_STAY) || coop->value) 
@@ -1195,8 +1197,9 @@ void weapon_shotgun_fire (edict_t *ent)
 		kick *= 4;
 	}
 
-	if (deathmatch->value)
+	if (deathmatch->value){
 		fire_shotgun (ent, start, forward, damage, kick, 500, 500, DEFAULT_DEATHMATCH_SHOTGUN_COUNT, MOD_SHOTGUN);
+	}
 	else
 		fire_shotgun (ent, start, forward, damage, kick, 500, 500, DEFAULT_SHOTGUN_COUNT, MOD_SHOTGUN);
 
@@ -1398,9 +1401,9 @@ void weapon_bfg_fire (edict_t *ent)
 
 	VectorSet(offset, 8, 8, ent->viewheight-8);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-	fire_bfg (ent, start, forward, damage, 400, damage_radius);
+	fire_bfg (ent, start, forward, 0, 400, damage_radius);
 	fire_bfg (ent, start, forward, damage, 800, damage_radius);
-	fire_bfg (ent, start, forward, damage, 1200, damage_radius);
+	fire_bfg (ent, start, forward, 0, 1200, damage_radius);
 
 	ent->client->ps.gunframe++;
 

@@ -367,21 +367,22 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 	if (!targ->takedamage)
 		return;
 	
-	if(!inflictor->hunter){
-		gi.dprintf("hunter not hit\n HUNTER NOT HIT");
+	if(!attacker->hunter){
 		if(!targ->hunter){
 			targ->health += 10;
 			return;
 		}
+		else
+		{
+		gi.dprintf("hunter hit nothing happens\n");
+		if(inflictor != targ)
+			return;
+		}
 	}
 	else{
-		gi.dprintf("hunter hit");
+		gi.dprintf("hunter hitting");
 	}
-	if(damage < 0)
-	{//Jarel Test
-		gi.dprintf("Test for healing grenades");
-		targ->health = targ->health + 10;
-	}
+
 
 	// friendly fire avoidance
 	// if enabled you can't hurt teammates (but you can hurt yourself)
@@ -490,7 +491,8 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 
 
 		targ->health = targ->health - take;
-		targ->poison = 1;
+		//targ->poison = 1;
+		attacker->replacement = targ;//replacement system
 			
 		if (targ->health <= 0)
 		{
