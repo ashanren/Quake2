@@ -990,6 +990,7 @@ typedef enum
 #define STAT_CHASE				16
 #define STAT_SPECTATOR			17
 #define STAT_HUNTER				18
+//#define STAT_DUCK				19
 
 #define	MAX_STATS				32
 

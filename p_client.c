@@ -571,7 +571,7 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	}
 
 	self->deadflag = DEAD_DEAD;
-
+	self->stun = 0;
 	gi.linkentity (self);
 }
 
@@ -1292,13 +1292,13 @@ void ClientBegin (edict_t *ent)
 	if (deathmatch->value)
 	{
 		ClientBeginDeathmatch (ent);
-		gi.dprintf("Number of clients: %i", (ent - g_edicts - 1));
 		if( (ent - g_edicts - 1) == 0){
 			ent->hunter = 1;
 			ent->timer = level.time+300;
 		}
-		else
+		else{
 			ent->hunter = 0;
+		}
 		return;
 	}
 
@@ -1594,7 +1594,8 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			if(ent->replacement)
 			{
 				ent->replacement->hunter = 1;
-				ent->replacement->timer = level.time+300;
+
+				ent->replacement->timer = level.time+5;
 			}
 			else
 				gi.dprintf("Well done you Get nothing ");
@@ -1614,7 +1615,6 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	if(floor(level.time) == level.time){
 		//gi.dprintf("Hunter: %i", ent->hunter);
 		if(ent->hunter){
-			gi.dprintf("%i",ent->client->resp.score);
 		}
 		if(ent->poison){
 			//gi.dprintf("Client is Thinking: %c\n", ent->classname);
@@ -1648,7 +1648,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		memset (&pm, 0, sizeof(pm));
 
 		if (ent->movetype == MOVETYPE_NOCLIP)
-			client->ps.pmove.pm_type = PM_SPECTATOR;
+			client->ps.pmove.pm_type = PM_SPECTATOR;//fly test
 		else if (ent->s.modelindex != 255)
 			client->ps.pmove.pm_type = PM_GIB;
 		else if (ent->deadflag)
@@ -1661,16 +1661,14 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 		for (i=0 ; i<3 ; i++)
 		{
-			
+			pm.s.origin[i] = ent->s.origin[i]*8;	
 			if(ent->hunter || !ent->stun)
 			{
 				//add something for flight later
-				pm.s.origin[i] = ent->s.origin[i]*8;
 				pm.s.velocity[i] = ent->velocity[i]*8;
 			}
 			else if(ent->stun)
 			{
-				pm.s.origin[i] = 0;
 				pm.s.velocity[i] = 0;
 			}
 		}
@@ -1695,10 +1693,14 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 		for (i=0 ; i<3 ; i++)
 		{
-			//ent->s.origin[i] = pm.s.origin[i]*0.125;
-			//ent->velocity[i] = pm.s.velocity[i]*0.125;
 			ent->s.origin[i] = pm.s.origin[i]*0.125;
 			ent->velocity[i] = pm.s.velocity[i]*0.125;
+			if(!ent->hunter){
+				if(ent->velocity[i] * 1.08 < 200 && ent->velocity[i] * 1.08 > -200)
+ 				{
+ 					ent->velocity[i] *= 1.08;
+ 				}
+			}
 		}
 
 		VectorCopy (pm.mins, ent->mins);

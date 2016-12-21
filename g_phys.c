@@ -434,8 +434,7 @@ qboolean SV_Push (edict_t *pusher, vec3_t move, vec3_t amove)
 			continue;
 		if (check->movetype == MOVETYPE_PUSH
 		|| check->movetype == MOVETYPE_STOP
-		|| check->movetype == MOVETYPE_NONE
-		|| check->movetype == MOVETYPE_NOCLIP)
+		|| check->movetype == MOVETYPE_NONE)//|| check->movetype == MOVETYPE_NOCLIP
 			continue;
 
 		if (!check->area.prev)
@@ -936,7 +935,7 @@ void G_RunEntity (edict_t *ent)
 		SV_Physics_Noclip (ent);
 		break;
 	case MOVETYPE_STEP:
-		SV_Physics_Step (ent);
+		SV_Physics_Step (ent);//FLY TEST
 		break;
 	case MOVETYPE_TOSS:
 	case MOVETYPE_BOUNCE:

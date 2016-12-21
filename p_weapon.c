@@ -1320,7 +1320,7 @@ void weapon_railgun_fire (edict_t *ent)
 
 	VectorSet(offset, 0, 7,  ent->viewheight-8);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-	fire_rail (ent, start, forward, damage, kick);
+	fire_rail (ent, start, forward, damage-50, kick);
 
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);

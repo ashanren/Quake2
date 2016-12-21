@@ -76,6 +76,7 @@ void Killed (edict_t *targ, edict_t *inflictor, edict_t *attacker, int damage, v
 		targ->health = -999;
 
 	targ->enemy = attacker;
+	targ->stun = 0;
 
 	if ((targ->svflags & SVF_MONSTER) && (targ->deadflag != DEAD_DEAD))
 	{
@@ -369,7 +370,16 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 	
 	if(!attacker->hunter){
 		if(!targ->hunter){
-			targ->health += 10;
+			if(targ->stun || targ->poison)
+			{
+				targ->stun = 0;
+				targ->poison = 0;
+			}
+			else{
+				if(targ->health+10 <= 100)
+					targ->health += 10;
+
+			}
 			return;
 		}
 		else
@@ -380,7 +390,6 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 		}
 	}
 	else{
-		gi.dprintf("hunter hitting");
 	}
 
 
